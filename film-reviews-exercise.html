@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Film reviews: match and complete</title>
+<style>
+:root{--bg:#f5f7fb;--card:#fff;--ink:#1b2438;--muted:#5d6b85;--blue:#1f4fd8;--tint:#dfe9fb;--ok:#1d8a4e;--okbg:#dff3e7;--bad:#c23a2b;--badbg:#fbe3df;--line:#c9d3e6}
+@media (prefers-color-scheme:dark){:root{--bg:#141a28;--card:#1d2536;--ink:#e8edf8;--muted:#9aa8c4;--blue:#7ea2ff;--tint:#26324d;--ok:#6fd49b;--okbg:#1c3a2b;--bad:#ff8f80;--badbg:#42221f;--line:#34425f}}
+*{box-sizing:border-box}
+body{margin:0;padding:16px;background:var(--bg);color:var(--ink);font:17px/1.7 Georgia,"Times New Roman",serif}
+.wrap{max-width:860px;margin:0 auto}
+h1{font:700 22px/1.3 system-ui,Arial,sans-serif;margin:0 0 6px}
+h1 span{color:var(--blue);margin-right:8px}
+p.task{margin:0 0 14px;font:15px/1.5 system-ui,Arial,sans-serif;color:var(--muted)}
+.bank{background:var(--tint);border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px 24px;font:16px system-ui,Arial,sans-serif;margin-bottom:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px 16px;margin-bottom:14px}
+.head{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px;font:14px system-ui,Arial,sans-serif;color:var(--muted)}
+.letter{font:700 18px system-ui,Arial,sans-serif;color:var(--blue)}
+select{font:15px system-ui,Arial,sans-serif;color:var(--ink);background:var(--card);border:1.5px solid var(--line);border-radius:6px;padding:3px 4px;max-width:100%}
+select:focus{outline:2px solid var(--blue);outline-offset:1px}
+.gap{margin:0 2px}
+.gap sup{font:11px system-ui,Arial;color:var(--muted)}
+select.ok{border-color:var(--ok);background:var(--okbg)}
+select.bad{border-color:var(--bad);background:var(--badbg)}
+.bar{position:sticky;bottom:0;display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:12px 0;background:var(--bg);font-family:system-ui,Arial,sans-serif}
+button{font:600 15px system-ui,Arial,sans-serif;border:0;border-radius:8px;padding:9px 18px;cursor:pointer;background:var(--blue);color:#fff}
+button.sec{background:var(--tint);color:var(--ink)}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+#score{font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1><span>6</span>Match and complete</h1>
+<p class="task">Step 1: match each group of three words with one of the texts (a–d). Step 2: complete the gaps with the three words from your group.</p>
+<div class="bank">
+<div>tackles, twists, remake</div><div>flaw, adaptation, shot</div>
+<div>sequel, smash, revolves</div><div>cast, touches, classic</div>
+</div>
+<div id="app"></div>
+<div class="bar">
+<button id="check">Check answers</button>
+<button id="reset" class="sec">Try again</button>
+<span id="score" aria-live="polite"></span>
+</div>
+</div>
+<script>
+var GROUPS=["tackles, twists, remake","flaw, adaptation, shot","sequel, smash, revolves","cast, touches, classic"];
+var T=[
+{l:"a",g:3,parts:["<i>Casablanca</i> is an all-time ",". I must\u2019ve watched it more than twenty times and every time I notice something new in it. It\u2019s got an amazing "," \u2013 including Humphrey Bogart and Ingrid Berman \u2013 and it "," on the fears people experienced and the terrible things they lived through during the Second World War."],a:["classic","cast","touches"]},
+{l:"b",g:1,parts:["<i>Old</i> is an "," of a graphic novel and it was "," in the Dominican Republic. It\u2019s a very weird thriller about people on a beach who suddenly start getting old very quickly. If the film has a ",", it\u2019s that it doesn\u2019t leave much to the imagination."],a:["adaptation","shot","flaw"]},
+{l:"c",g:2,parts:["<i>Captain America: The Winter Soldier</i> was a "," hit when it came out in 2014. It\u2019s the "," to <i>The First Avenger</i>, which was released a few years earlier. The plot "," around Steve Rogers \u2013 Captain America \u2013 who\u2019s in a race against time to stop a terrorist attack."],a:["smash","sequel","revolves"]},
+{l:"d",g:0,parts:["<i>Hide and Seek</i> is an English-language "," of a South Korean film. It\u2019s a psychological thriller filled with shocking "," and turns. Set in New York City, the film "," issues around the wealth gap and the way certain areas are becoming ever-more expensive."],a:["remake","twists","tackles"]}
+];
+function opts(first,list){return '<option value="">'+first+'</option>'+(list||[]).map(function(w){return '<option>'+w+'</option>'}).join('')}
+var app=document.getElementById('app');
+function build(){
+ app.innerHTML=T.map(function(t,i){
+  var h='<div class="card"><div class="head"><span class="letter">'+t.l+'</span> 1) Choose the group: <select data-g="'+i+'" aria-label="Group for text '+t.l+'"><option value="">choose…</option>'+GROUPS.map(function(g,k){return '<option value="'+k+'">'+g+'</option>'}).join('')+'</select></div><div>';
+  t.parts.forEach(function(p,k){
+   h+=p;
+   if(k<t.a.length)h+='<span class="gap"><sup>'+(k+1)+'</sup><select data-t="'+i+'" data-k="'+k+'" aria-label="Gap '+(k+1)+' in text '+t.l+'" disabled>'+opts('…')+'</select></span>';
+  });
+  return h+'</div></div>';
+ }).join('');
+ document.getElementById('score').textContent='';
+}
+app.addEventListener('change',function(e){
+ var g=e.target.closest('select[data-g]');if(!g)return;
+ var card=g.closest('.card'),words=g.value===''?[]:GROUPS[+g.value].split(', ');
+ g.classList.remove('ok','bad');
+ card.querySelectorAll('select[data-t]').forEach(function(x){x.innerHTML=opts('…',words);x.disabled=!words.length;x.classList.remove('ok','bad')});
+});
+function mark(el,ok){el.classList.remove('ok','bad');el.classList.add(ok?'ok':'bad')}
+document.getElementById('check').onclick=function(){
+ var total=4,good=0;
+ app.querySelectorAll('select[data-g]').forEach(function(s,i){var ok=s.value!==''&&+s.value===T[i].g;if(ok)good++;mark(s,ok)});
+ app.querySelectorAll('select[data-t]').forEach(function(s){total++;var ok=s.value===T[+s.dataset.t].a[+s.dataset.k];if(ok)good++;mark(s,ok)});
+ document.getElementById('score').textContent='Score: '+good+' / '+total+(good===total?' \u2013 well done!':'');
+};
+document.getElementById('reset').onclick=build;
+build();
+</script>
+</body>
+</html>
